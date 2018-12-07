@@ -1,0 +1,40 @@
+define Problem {
+	goal: null,
+	num1: null,
+	num2: null,
+	den1: null,
+	den2: null,
+	asIs: null,
+	commonDen: null,
+	conversion: null,
+	compare: null,
+	constructor: function(n1, d1, n2, d2) {
+		this.num1 = n1;
+		this.den1 = d1;
+		this.num2 = n2,
+		this.den2 = d2;
+	}
+}
+
+
+define StudentValues {
+	selection: null,
+	action: null,
+	input: null,
+	constructor: function(s, a, i) {
+		this.selection = s;
+		this.action = a;
+		this.input = i;
+	}
+}
+
+define TPA {
+	selection: null,
+	action: null,
+	input: null,
+	constructor: function(s, a, i) {
+		this.selection = s;
+		this.action = a;
+		this.input = i;
+	}
+}

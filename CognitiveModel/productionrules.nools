@@ -1,0 +1,63 @@
+// import("types.nools");
+
+rule bootstrap {
+	when {
+		b: Boolean b === true from true;
+	}
+	then {
+
+		assert(new Problem(num1, den1, num2, den2));
+
+		setProblemAttribute("use_backtracking", true);
+		halt();		
+	}
+}
+
+
+
+// rule bootstrap {
+// 	when {
+// 		b: Boolean b === true from true;
+// 	}
+// 	then {
+// 		// assert(new TPA("problemstatement", "UpdateTextArea", probtxt));
+// 		// assert(new TPA("strain1", "UpdateTextField", strain1.name));
+// 		// assert(new TPA("strain2", "UpdateTextField", strain2.name));
+// 		// assert(new TPA("strain3", "UpdateTextField", strain3.name));
+	
+// 		// assert(new Strain(strain1.name, strain1.n, strain1.phenotype, "concPartStr1", "concFinalStr1"));
+// 		// assert(new Strain(strain2.name, strain2.n, strain2.phenotype, "concPartStr2", "concFinalStr2"));
+// 		// assert(new Strain(strain3.name, strain3.n, strain3.phenotype, "concPartStr3", "concFinalStr3"));
+	
+// 		// assert(new Cross("cross1", cross1.strains, cross1.offspringExt, cross1.offspringInt));
+// 		// assert(new Cross("cross2", cross2.strains, cross2.offspringExt, cross2.offspringInt));
+// 		// assert(new Cross("cross3", cross3.strains, cross3.offspringExt, cross3.offspringInt));
+// 		// assert(new Cross("cross4", cross4.strains, cross4.offspringExt, cross4.offspringInt));
+// 		// assert(new Cross("cross5", cross5.strains, cross5.offspringExt, cross5.offspringInt));
+// 		// assert(new Cross("cross6", cross6.strains, cross6.offspringExt, cross6.offspringInt));
+		
+// 		// var crossName, rowNames = [];
+// 		// for (var i = 1; i < 7; i++) {
+// 		// 	crossName = "Cr"+i;
+// 		// 	rowNames.push(crossName+"Row");
+// 		// 	assert(new interfaceElement(crossName+"Str1", null));
+// 		// 	assert(new interfaceElement(crossName+"Str2", null));
+// 		// 	assert(new interfaceElement(crossName+"Offspring", null));
+// 		// 	assert(new interfaceRow(crossName+"Row", [crossName+"Str1",crossName+"Str2"], crossName+"Offspring")); 
+// 		// }
+		
+// 		// var intElPartName, intElFinalName;
+// 		// for (var i = 1; i < 4; i++) {
+// 		// 	intElPartName = "concPartStr"+i;
+// 		// 	intElFinalName = "concFinalStr"+i;
+// 		// 	assert(new interfaceElement(intElPartName, null));
+// 		// 	assert(new interfaceElement(intElFinalName, null));
+// 		// }
+		
+// 		// assert(new Problem(probname, [strain1.name, strain2.name, strain3.name], rowNames, [strain1.phenotype, strain2.phenotype, strain3.phenotype]));
+
+	
+// 		setProblemAttribute("use_backtracking", true);
+// 		halt();
+// 	}
+// }
