@@ -64,13 +64,13 @@ rule loadSkills {
 				assert(new TPA("step_1_worked", "SetVisible", true));
 				let workedExampleText = "";
 				if (canCompare(num1, den1, num2, den2)) {
-					workedExampleText = "We can compare these two fractions without writing them differently. Do you know why?";
+					workedExampleText = "<html><p>We can compare these two fractions without writing them differently. Do you know why?</p> <math ><mrow><mfrac><mn>2</mn><mn>3</mn></mfrac></mrow></math> <p>WORD</p></html>";
 				} else {
 					workedExampleText = "We can't compare these two fractions without making some changes first. Do you know why?";
 				}
 				console.log(workedExampleText);
-				assert(new TPA("step_1_worked", "UpdateTextArea", workedExampleText));
-				assert(new TPA("step_1_worked", "lock", false));	
+				assert(new TPA("step_1_worked", "UpdateTextField", workedExampleText));
+				// assert(new TPA("step_1_worked", "lock", false));	
 				modify(p, "goal", "step1");
 				halt();
 			}
