@@ -1,0 +1,16 @@
+global skill_definitions = [
+	{
+		ruleName: "step1ReasonSameDen",
+		skillName: "step1Reason",
+		category: "1.1",
+		opportunities: 1,
+		label: "Justify Direct Comparision"
+	},
+	{
+		ruleName: "step1ReasonSameNum",
+		skillName: "step1Reason",
+		category: "1.1",
+		opportunities: 1,
+		label: "Justify Direct Comparision"
+	},
+];

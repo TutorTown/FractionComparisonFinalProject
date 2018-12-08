@@ -13,6 +13,7 @@ define Problem {
 		this.den1 = d1;
 		this.num2 = n2,
 		this.den2 = d2;
+		this.goal = "loadSkills";
 	}
 }
 

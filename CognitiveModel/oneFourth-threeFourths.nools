@@ -1,3 +1,4 @@
+import("skillDefinitions.nools");
 import("productionrules.nools");
 
 global num1 = 1;
