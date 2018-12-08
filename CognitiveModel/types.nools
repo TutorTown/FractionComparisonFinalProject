@@ -6,8 +6,12 @@ define Problem {
 	den2: null,
 	asIs: null,
 	commonDen: null,
-	conversion: null,
-	compare: null,
+	//conversion: null, 
+	step1Version : null, //could be "worked", "practice", "reason"
+	step2Version : null, //could be "worked", "practice", "reason"
+	step5Version : null,  //could be "worked", "practice", "reason"
+	//compare: null, //true,false
+
 	constructor: function(n1, d1, n2, d2) {
 		this.num1 = n1;
 		this.den1 = d1;

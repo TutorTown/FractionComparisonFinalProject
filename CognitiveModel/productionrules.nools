@@ -21,23 +21,6 @@ rule bootstrap {
 			assert(new TPA("den2", "UpdateTextArea", den2));
 
 
-
-			// let skills = CTAT.ToolTutor.tutor.getProblemSummary().getSkills().getAllSkills();
-			// console.log("\n\nskills");
-			// console.log(skills);
-
-			// // Reveal step 1 worked example version
-			// assert(new TPA("step_1_reason_container", "SetVisible", true));
-			// assert(new TPA("step_1_worked", "SetVisible", true));
-			// let workedExampleText = "";
-			// if (canCompare(num1, den1, num2, den2)) {
-			// 	workedExampleText = "We can compare these two fractions without writing them differently. Do you know why?";
-			// } else {
-			// 	workedExampleText = "We can't compare these two fractions without making some changes first. Do you know why?";
-			// }
-			// console.log(workedExampleText);
-			// assert(new TPA("step_1_worked", "UpdateTextArea", workedExampleText));
-
 			// Create Problem
 			assert(new Problem(num1, den1, num2, den2));
 
@@ -58,19 +41,58 @@ rule loadSkills {
 				let skills = CTAT.ToolTutor.tutor.getProblemSummary().getSkills().getAllSkills();
 				console.log("\n\nskills");
 				console.log(skills);
-
-				// Reveal step 1 worked example version
-				assert(new TPA("step_1_reason_container", "SetVisible", true));
-				assert(new TPA("step_1_worked", "SetVisible", true));
-				let workedExampleText = "";
-				if (canCompare(num1, den1, num2, den2)) {
-					workedExampleText = "<html><p>We can compare these two fractions without writing them differently. Do you know why?</p> <math ><mrow><mfrac><mn>2</mn><mn>3</mn></mfrac></mrow></math> <p>WORD</p></html>";
-				} else {
-					workedExampleText = "We can't compare these two fractions without making some changes first. Do you know why?";
+				let s1_skill = 0;
+               if(p.den1 == p.den2)
+               {
+               		console.log("Got skill: same den");
+                	s1_skill = skills[0].getPKnown();
+                	console.log(skills[0].getSkillName());
+               }
+               else if(p.num1 == p.num2)
+               {
+               		console.log("Got skill: same num");
+                 	s1_skill = skills[1].getPKnown();
+                 	console.log(skills[1].getSkillName());
+               }
+               else if( (p.num1/p.den1 < 1 && p.num2/p.den2 > 1) || (p.num1/p.den1 > 1 && p.num2/p.den2 < 1))
+               {
+               		console.log("Got skill: compare to 1");
+                    s1_skill = skills[3].getPKnown();
+                    console.log(skills[3].getSkillName());
+               }
+				else 
+				{
+					console.log("Got skill: unlike");
+                    s1_skill = skills[2].getPKnown();
+                    console.log(skills[2].getSkillName());
 				}
-				console.log(workedExampleText);
-				assert(new TPA("step_1_worked", "UpdateTextField", workedExampleText));
-				// assert(new TPA("step_1_worked", "lock", false));	
+				if (s1_skill < 0.25)
+				{
+
+					console.log("Worked example");
+	                assert(new TPA("step_1_worked", "SetVisible", true));
+	                assert(new TPA("step_1_reason_container", "SetVisible", true));
+					// Reveal step 1 worked example version
+					let workedExampleText = "";
+					if (canCompare(num1, den1, num2, den2)) {
+						workedExampleText = "We can compare these two fractions without writing them differently. Do you know why?";
+					} else {
+						workedExampleText = "We can't compare these two fractions without making some changes first. Do you know why?";
+					}
+					console.log(workedExampleText);
+					modify(p, "step1Version", "worked");
+					assert(new TPA("step_1_worked", "UpdateTextField", workedExampleText));
+
+
+				}
+				else
+				{
+					console.log("practicing step 1");
+                 	assert(new TPA("step_1_practice_container", "SetVisible", true));
+                 	modify(p, "step1Version", "practice");
+
+				}
+
 				modify(p, "goal", "step1");
 				halt();
 			}
@@ -83,7 +105,7 @@ rule loadSkills {
 ////////////////////////
 rule step1ReasonSameNum {
 	when {
-		p: Problem p.goal === "step1" && p.num1 == p.num2;
+		p: Problem p.goal === "step1" && p.num1 == p.num2 && p.step1Version == "worked";
 	}
 	then {
 		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-0: The numerators are the same."})) {
@@ -98,7 +120,7 @@ rule step1ReasonSameNum {
 
 rule step1ReasonSameDen {
 	when {
-		p: Problem p.goal === "step1" && p.den1 == p.den2;
+		p: Problem p.goal === "step1" && p.den1 == p.den2 && p.step1Version == "worked";
 	}
 	then {
 		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-1: The denominators are the same."})) {
@@ -111,34 +133,63 @@ rule step1ReasonSameDen {
 	}
 }
 
-// rule step1ReasonCompareToOne {
-// 	when {
-// 		p: Problem p.goal === "step1" && ( (p.num1/p.den1 < 1 && p.num2/p.den2 > 1) || (p.num1/p.den1 > 1 && p.num2/p.den2 < 1) );
-// 	}
-// 	then {
-// 		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-2: One of the fractions is less than 1 and the other is greater than 1."})) {
-// 			modify(p, "goal", "step5");
-// 			assert(new TPA("step_5_practice", "SetVisible", true));
-// 			halt();
-// 		} else {
-// 			backtrack();
-// 		}
-// 	}
-// }
+rule step1ReasonCompareToOne {
+	when {
+		p: Problem p.goal === "step1" && ( (p.num1/p.den1 < 1 && p.num2/p.den2 > 1) || (p.num1/p.den1 > 1 && p.num2/p.den2 < 1) ) && p.step1Version == "worked";
+	}
+	then {
+		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-2: One of the fractions is less than 1 and the other is greater than 1."})) {
+			modify(p, "goal", "step5");
+			assert(new TPA("step_5_practice", "SetVisible", true));
+			halt();
+		} else {
+			backtrack();
+		}
+	}
+}
 
-// rule step1ReasonUnlikeFractions {
-// 	when {
-// 		p: Problem p.goal === "step1" && !canCompare(p.num1, p.den1, p.num2, p.den2);
-// 	}
-// 	then {
-// 		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-3: None of the above"})) {
-// 			modify(p, "goal", "step2");
-// 			halt();
-// 		} else {
-// 			backtrack();
-// 		}
-// 	}
-// }
+rule step1ReasonUnlikeFractions {
+	when {
+		p: Problem p.goal === "step1" && !canCompare(p.num1, p.den1, p.num2, p.den2) && p.step1Version == "worked";
+	}
+	then {
+		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-3: None of the above"})) {
+			modify(p, "goal", "step2");
+			halt();
+		} else {
+			backtrack();
+		}
+	}
+}
+
+
+rule step1practice
+{
+	when 
+	{
+      p : Problem p.goal === "step1" && p.step1Version == "practice";
+	}
+	then
+	{
+		const compare = canCompare(p.num1, p.den1, p.num2, p.den2);
+		console.log(compare);
+		if (compare) {
+			if (checkSAI({selection: "step_1_practice", action: "UpdateRadioButton", input: "step_1_practice-option-0: Yes"})) {
+				modify(p, "goal", "step5");
+				halt();
+			} else {
+				backtrack();
+			}
+		} else {
+			if (checkSAI({selection: "step_1_practice", action: "UpdateRadioButton", input: "step_1_practice-option-1: No"})) {
+				modify(p, "goal", "step2");
+				halt();
+			} else {
+				backtrack();
+			}
+		}
+	}
+}
 
 ////////////////////////
 // Step 2 Explanation //
