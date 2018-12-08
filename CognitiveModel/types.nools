@@ -6,6 +6,7 @@ define Problem {
 	den2: null,
 	asIs: null,
 	commonDen: null,
+	commonDenStrat: null, //Whether worked example used LCM or product
 	//conversion: null, 
 	step1Version : null, //could be "worked", "practice", "reason"
 	step2Version : null, //could be "worked", "practice", "reason"

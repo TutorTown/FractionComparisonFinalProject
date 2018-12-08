@@ -1,10 +1,55 @@
 // import("types.nools");
+
+// Math Helpers
+function gcd(o, p)
+{
+	if (o < p) {
+		let tmp = o;
+		o = p;
+		p = tmp;
+	}
+	var r;
+	while (p >= 1) {
+		r = o%p;
+		o = p;
+		p = r
+	}	
+	return o;
+}
+
+function lcm(m, n)
+{
+	return ((m*n)/gcd(m, n));
+}
+
+// Able to direclty compare fractions
 function canCompare(n1, d1, n2, d2) {
 	if (n1 === n2 || d1 === d2 || (n1/d1 < 1 && n2/d2 > 1) || (n1/d1 > 1 && n2/d2 < 1)) {
 		return true;
 	} else {
 		return false;
 	}
+}
+
+// helper to reveal correct version of step 2
+function revealStepTwo(problem) {
+	if (problem.step2Version === "practice") {
+		assert(new TPA("step_2_grouped_practice", "SetVisible", true));
+	} else {
+		assert(new TPA("step_2_worked", "SetVisible", true));
+		assert(new TPA("step_2_reason_container", "SetVisible", true));
+		const txt = "We can use " + problem.commonDen + " as a common denominator.";
+		assert(new TPA("step_2_worked", "UpdateTextField", txt));
+	}
+}
+
+// Check if student entered a valid common denominator
+function validateCommonDenominator(studentSAI, tutorSAI) 
+{
+	console.log("validateCommonDenominator");
+	console.log(parseFloat(studentSAI.input)%parseFloat(tutorSAI.input) == 0);
+
+	return (parseFloat(studentSAI.input)%parseFloat(tutorSAI.input) == 0);
 }
 
 rule bootstrap {
@@ -39,37 +84,26 @@ rule loadSkills {
 
 			if (checkSAI({selection: "don't_care", action: "don't_care", input: "don't_care"})) {
 				let skills = CTAT.ToolTutor.tutor.getProblemSummary().getSkills().getAllSkills();
-				console.log("\n\nskills");
-				console.log(skills);
+				// Determine step 1 version based on student skill
 				let s1_skill = 0;
                if(p.den1 == p.den2)
                {
-               		console.log("Got skill: same den");
                 	s1_skill = skills[0].getPKnown();
-                	console.log(skills[0].getSkillName());
                }
                else if(p.num1 == p.num2)
                {
-               		console.log("Got skill: same num");
                  	s1_skill = skills[1].getPKnown();
-                 	console.log(skills[1].getSkillName());
                }
                else if( (p.num1/p.den1 < 1 && p.num2/p.den2 > 1) || (p.num1/p.den1 > 1 && p.num2/p.den2 < 1))
                {
-               		console.log("Got skill: compare to 1");
                     s1_skill = skills[3].getPKnown();
-                    console.log(skills[3].getSkillName());
                }
 				else 
 				{
-					console.log("Got skill: unlike");
                     s1_skill = skills[2].getPKnown();
-                    console.log(skills[2].getSkillName());
 				}
-				if (s1_skill < 0.25)
+				if (s1_skill < 0.95)
 				{
-
-					console.log("Worked example");
 	                assert(new TPA("step_1_worked", "SetVisible", true));
 	                assert(new TPA("step_1_reason_container", "SetVisible", true));
 					// Reveal step 1 worked example version
@@ -79,7 +113,6 @@ rule loadSkills {
 					} else {
 						workedExampleText = "We can't compare these two fractions without making some changes first. Do you know why?";
 					}
-					console.log(workedExampleText);
 					modify(p, "step1Version", "worked");
 					assert(new TPA("step_1_worked", "UpdateTextField", workedExampleText));
 
@@ -87,10 +120,30 @@ rule loadSkills {
 				}
 				else
 				{
-					console.log("practicing step 1");
                  	assert(new TPA("step_1_practice_container", "SetVisible", true));
                  	modify(p, "step1Version", "practice");
 
+				}
+
+
+				// Determine step 2 version based on student skill
+				let lowerS2Skill = 0;
+					// Identify which reasoning skill is lower for student (using LCM or using product)
+				if (skills[5].getPKnown() <= skills[4].getPKnown()) { //Worse at identifying LCM
+					lowerS2Skill = skills[5].getPKnown();
+					modify(p, "commonDen", lcm(p.den1, p.den2));
+					modify(p, "commonDenStrat", "LCM");
+				} else { //Worse at identifying product
+					lowerS2Skill = skills[4].getPKnown();
+					modify(p, "commonDen", p.den1*p.den2);
+					modify(p, "commonDenStrat", "product");
+				}
+				if (lowerS2Skill < .95) {
+					modify(p, "step2Version", "worked");
+				} else {
+					modify(p, "step2Version", "practice");
+
+					modify(p, "commonDen", null);
 				}
 
 				modify(p, "goal", "step1");
@@ -155,6 +208,7 @@ rule step1ReasonUnlikeFractions {
 	then {
 		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-3: None of the above"})) {
 			modify(p, "goal", "step2");
+			revealStepTwo(p);
 			halt();
 		} else {
 			backtrack();
@@ -172,7 +226,6 @@ rule step1practice
 	then
 	{
 		const compare = canCompare(p.num1, p.den1, p.num2, p.den2);
-		console.log(compare);
 		if (compare) {
 			if (checkSAI({selection: "step_1_practice", action: "UpdateRadioButton", input: "step_1_practice-option-0: Yes"})) {
 				modify(p, "goal", "step5");
@@ -183,6 +236,7 @@ rule step1practice
 		} else {
 			if (checkSAI({selection: "step_1_practice", action: "UpdateRadioButton", input: "step_1_practice-option-1: No"})) {
 				modify(p, "goal", "step2");
+				revealStepTwo(p);
 				halt();
 			} else {
 				backtrack();
@@ -194,3 +248,60 @@ rule step1practice
 ////////////////////////
 // Step 2 Explanation //
 ////////////////////////
+rule step2ReasonProduct {
+	when
+	{
+      p: Problem p.goal == "step2" &&  p.step2Version == "worked" && p.commonDenStrat == "product";
+	}
+	then
+	{
+		if (checkSAI({selection: "step_2_reason", action: "UpdateRadioButton", input: "step_2_reason-option-1: It is the product of the two numbers"}))
+		{
+			modify(p, "goal", "step3");
+			halt();
+		}
+		else
+		{
+			backtrack();
+		}
+	}
+}
+
+rule step2ReasonLCM {
+	when {
+		p: Problem p.goal == "step2" && p.step2Version == "worked" && p.commonDenStrat == "LCM";
+	}
+	then 
+	{
+		if (checkSAI({selection: "step_2_reason", action: "UpdateTextArea", input: "5"})) 
+		{
+			modify(p, "goal", "step3");
+			halt();
+		}
+		else
+		{
+			backtrack();
+		}
+	}
+}
+
+rule step2Practice
+{
+	when 
+	{
+      p : Problem p.goal == "step2" && p.step2Version == "practice";
+	}
+	then
+	{		
+		let tutorSAI = lcm(p.den1,p.den2);
+		if (checkSAI({selection: "step_2_practice_part2", action: "UpdateTextArea", input: tutorSAI}, validateCommonDenominator)) 
+		{
+			modify(p, "goal", "step4");
+			halt();
+		}													
+		else
+		{
+			backtrack();
+		}
+	}
+}
