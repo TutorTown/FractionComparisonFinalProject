@@ -153,9 +153,9 @@ rule loadSkills {
 	}
 }
 
-////////////////////////
-// Step 1 Explanation //
-////////////////////////
+////////////
+// Step 1 //
+////////////
 rule step1ReasonSameNum {
 	when {
 		p: Problem p.goal === "step1" && p.num1 == p.num2 && p.step1Version == "worked";
@@ -163,7 +163,7 @@ rule step1ReasonSameNum {
 	then {
 		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-0: The numerators are the same."})) {
 			modify(p, "goal", "step5");
-			assert(new TPA("step_5_practice", "SetVisible", true));
+			assert(new TPA("step_5_practice_container", "SetVisible", true));
 			halt();
 		} else {
 			backtrack();
@@ -178,7 +178,7 @@ rule step1ReasonSameDen {
 	then {
 		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-1: The denominators are the same."})) {
 			modify(p, "goal", "step5");
-			assert(new TPA("step_5_practice", "SetVisible", true));
+			assert(new TPA("step_5_practice_container", "SetVisible", true));
 			halt();
 		} else {
 			backtrack();
@@ -193,7 +193,7 @@ rule step1ReasonCompareToOne {
 	then {
 		if (checkSAI({selection: "step_1_reason", action: "UpdateRadioButton", input: "step_1_reason\n-option-2: One of the fractions is less than 1 and the other is greater than 1."})) {
 			modify(p, "goal", "step5");
-			assert(new TPA("step_5_practice", "SetVisible", true));
+			assert(new TPA("step_5_practice_container", "SetVisible", true));
 			halt();
 		} else {
 			backtrack();
@@ -245,9 +245,9 @@ rule step1practice
 	}
 }
 
-////////////////////////
-// Step 2 Explanation //
-////////////////////////
+/////////////
+// Step 2  //
+/////////////
 rule step2ReasonProduct {
 	when
 	{
@@ -257,6 +257,9 @@ rule step2ReasonProduct {
 	{
 		if (checkSAI({selection: "step_2_reason", action: "UpdateRadioButton", input: "step_2_reason-option-1: It is the product of the two numbers"}))
 		{
+			assert(new TPA("step_3_group", "SetVisible", true));
+			assert(new TPA("step_3_practice", "SetVisible", true));
+			assert(new TPA("step_3_option1", "UpdateTextField", "<html><p>before</p><math display = 'block'>  <mrow>   <mfrac><mn>5</mn>     <mn>6</mn>   </mfrac> </mrow></math><p>after</p></html>"));
 			modify(p, "goal", "step3");
 			halt();
 		}
@@ -273,8 +276,11 @@ rule step2ReasonLCM {
 	}
 	then 
 	{
-		if (checkSAI({selection: "step_2_reason", action: "UpdateTextArea", input: "5"})) 
+		if (checkSAI({selection: "step_2_reason", action: "UpdateRadioButton", input: "step_2_reason-option-0: It is the least common multiple(L.C.M.) of the two denominators."})) 
 		{
+			assert(new TPA("step_3_group", "SetVisible", true));
+			assert(new TPA("step_3_practice", "SetVisible", true));
+			assert(new TPA("step_3_option1", "UpdateTextField", "<html><p>before</p><math display = 'block'>  <mrow>   <mfrac><mn>5</mn>     <mn>6</mn>   </mfrac> </mrow></math><p>after</p></html>"));
 			modify(p, "goal", "step3");
 			halt();
 		}
@@ -296,11 +302,37 @@ rule step2Practice
 		let tutorSAI = lcm(p.den1,p.den2);
 		if (checkSAI({selection: "step_2_practice_part2", action: "UpdateTextArea", input: tutorSAI}, validateCommonDenominator)) 
 		{
+			assert(new TPA("step_3_group", "SetVisible", true));
+			assert(new TPA("step_3_practice", "SetVisible", true));
+			assert(new TPA("step_3_option1", "UpdateTextField", "<html><p>before</p><math display = 'block'>  <mrow>   <mfrac><mn>5</mn>     <mn>6</mn>   </mfrac> </mrow></math><p>after</p></html>"));
 			modify(p, "goal", "step4");
 			halt();
 		}													
 		else
 		{
+			backtrack();
+		}
+	}
+}
+
+////////////
+// Step 5 //
+////////////
+rule step5Practice {
+	when {
+		p: Problem p.goal == "step5";
+	}
+	then {
+		let correctAnswer = null;
+		if (p.num1/p.den1 > p.num2/p.den2) {
+			correctAnswer = "step_5_practice-option-0: Fraction 1";
+		} else {
+			correctAnswer = "step_5_practice-option-1: Fraction 2";
+		}
+		if (checkSAI({selection: "step_5_practice", action: "UpdateRadioButton", input: correctAnswer})) {
+			modify(p, "goal", "done");
+			halt();
+		} else {
 			backtrack();
 		}
 	}
