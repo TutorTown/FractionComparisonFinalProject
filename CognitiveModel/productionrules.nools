@@ -31,6 +31,13 @@ function canCompare(n1, d1, n2, d2) {
 	}
 }
 
+// Shuffles array in-place
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+}
 // helper to reveal correct version of step 2
 function revealStepTwo(problem) {
 	if (problem.step2Version === "practice") {
@@ -41,6 +48,28 @@ function revealStepTwo(problem) {
 		const txt = "We can use " + problem.commonDen + " as a common denominator.";
 		assert(new TPA("step_2_worked", "UpdateTextField", txt));
 	}
+}
+function revealStepThree(problem) {
+	const fraction1Conversion = parseInt(problem.commonDen/problem.den1);
+	const fraction2Conversion = parseInt(problem.commonDen/problem.den2);
+
+	// Create answer choices and shuffle them
+	const correctOption = `Multiply the top and bottom of Fraction 1 by ${fraction1Conversion} and multiply the top and bottom of Fraction 2 by ${fraction2Conversion}`;
+	const onlyTops = `Multiply the top of Fraction 1 by ${fraction1Conversion} and the top of Fraction 2 by ${problem.den}`;
+	const onlyBottoms = `Multiply the bottom of Fraction 1 by ${fraction1Conversion} and the bottom of Fraction 2 by ${problem.den}`;
+	const reversedOptions = `Multiply the top and bottom of Fraction 1 by ${fraction2Conversion} and multiply the top and bottom of Fraction 2 by ${fraction1Conversion}`;
+	let options = [correctOption, onlyTops, onlyBottoms, reversedOptions];
+	shuffle(options);
+	const correctIndex = options.indexOf(correctOption);
+	modify(problem, "step3CorrectOptionIndex", correctIndex);
+	modify(problem, "step3Options", options);
+	// Write options to interface
+	options.forEach((option, index) => {
+		assert(new TPA(`step_3_option${index+1}`, "UpdateTextField", option));
+	});
+
+	assert(new TPA("step_3_group", "SetVisible", true));
+	assert(new TPA("step_3_practice", "SetVisible", true));
 }
 
 // Check if student entered a valid common denominator
@@ -257,9 +286,10 @@ rule step2ReasonProduct {
 	{
 		if (checkSAI({selection: "step_2_reason", action: "UpdateRadioButton", input: "step_2_reason-option-1: It is the product of the two numbers"}))
 		{
-			assert(new TPA("step_3_group", "SetVisible", true));
-			assert(new TPA("step_3_practice", "SetVisible", true));
-			assert(new TPA("step_3_option1", "UpdateTextField", "<html><p>before</p><math display = 'block'>  <mrow>   <mfrac><mn>5</mn>     <mn>6</mn>   </mfrac> </mrow></math><p>after</p></html>"));
+			// assert(new TPA("step_3_group", "SetVisible", true));
+			// assert(new TPA("step_3_practice", "SetVisible", true));
+			// assert(new TPA("step_3_option1", "UpdateTextField", "<html><math display = 'block'>  <mrow>   <mfrac><mn>5</mn>     <mn>6</mn>   </mfrac> </mrow></math></html>"));
+			revealStepThree(p);
 			modify(p, "goal", "step3");
 			halt();
 		}
@@ -278,9 +308,11 @@ rule step2ReasonLCM {
 	{
 		if (checkSAI({selection: "step_2_reason", action: "UpdateRadioButton", input: "step_2_reason-option-0: It is the least common multiple(L.C.M.) of the two denominators."})) 
 		{
-			assert(new TPA("step_3_group", "SetVisible", true));
-			assert(new TPA("step_3_practice", "SetVisible", true));
-			assert(new TPA("step_3_option1", "UpdateTextField", "<html><p>before</p><math display = 'block'>  <mrow>   <mfrac><mn>5</mn>     <mn>6</mn>   </mfrac> </mrow></math><p>after</p></html>"));
+			// assert(new TPA("step_3_group", "SetVisible", true));
+			// assert(new TPA("step_3_practice", "SetVisible", true));
+			// assert(new TPA("step_3_option1", "UpdateTextField", "<html><math display = 'block'>  <mrow>   <mfrac><mn>5</mn>     <mn>6</mn>   </mfrac> </mrow></math></html>"));
+			
+			revealStepThree(p);
 			modify(p, "goal", "step3");
 			halt();
 		}
@@ -302,10 +334,11 @@ rule step2Practice
 		let tutorSAI = lcm(p.den1,p.den2);
 		if (checkSAI({selection: "step_2_practice_part2", action: "UpdateTextArea", input: tutorSAI}, validateCommonDenominator)) 
 		{
-			assert(new TPA("step_3_group", "SetVisible", true));
-			assert(new TPA("step_3_practice", "SetVisible", true));
-			assert(new TPA("step_3_option1", "UpdateTextField", "<html><p>before</p><math display = 'block'>  <mrow>   <mfrac><mn>5</mn>     <mn>6</mn>   </mfrac> </mrow></math><p>after</p></html>"));
-			modify(p, "goal", "step4");
+			// assert(new TPA("step_3_group", "SetVisible", true));
+			// assert(new TPA("step_3_practice", "SetVisible", true));
+			// assert(new TPA("step_3_option1", "UpdateTextField", "<html><math display = 'block'>  <mrow>   <mfrac><mn>5</mn>     <mn>6</mn>   </mfrac> </mrow></math></html>"));
+			revealStepThree(p);
+			modify(p, "goal", "step3");
 			halt();
 		}													
 		else
@@ -315,6 +348,73 @@ rule step2Practice
 	}
 }
 
+////////////
+// Step 3 //
+////////////
+rule step_3_practice {
+	when {
+		p: Problem p.goal == "step3";
+	}
+	then {
+		const correctInput = `step_3_radio${p.step3CorrectOptionIndex + 1}: `;
+		if (checkSAI({selection: "radioButtonGroup", action: "UpdateRadioButton", input: correctInput})) {
+			assert(new TPA("step_4_group", "SetVisible", true));
+			modify(p, "goal", "step4");
+			halt();
+		} else {
+			backtrack();
+		}
+	}
+}
+
+////////////
+// Step 4 //
+////////////
+rule step_4_den {
+	when {
+		p: Problem p.goal == "step4";
+		sv: StudentValues sv.selection == "den3" || sv.selection == "den4";
+	}
+	then {
+		if (checkSAI({selection: sv.selection, action: "UpdateTextArea", input: p.commonDen})) {
+			modify(p, sv.selection, sv.input);
+			if (p.num3 && p.den3 && p.num4 && p.den4) {
+				modify(p, "goal", "step5");
+				assert(new TPA("step_5_practice_container", "SetVisible", true));
+			}
+			halt();
+		} else {
+			backtrack();
+		}
+	}
+}
+rule step_4_num {
+	when {
+		p: Problem p.goal == "step4";
+		sv: StudentValues sv.selection == "num3" || sv.selection == "num4";
+	}
+	then {
+		let correctInput = null;
+		switch (sv.selection) {
+			case "num3":
+				correctInput = p.num1*p.commonDen/p.den1;
+				break;
+			case "num4":
+				correctInput = p.num2*p.commonDen/p.den2;
+				break;
+		}
+		if (checkSAI({selection: sv.selection, action: "UpdateTextArea", input: correctInput})) {
+			modify(p, sv.selection, sv.input);
+			if (p.num3 && p.den3 && p.num4 && p.den4) {
+				modify(p, "goal", "step5");
+				assert(new TPA("step_5_practice_container", "SetVisible", true));
+			}
+			halt();
+		} else {
+			backtrack();
+		}
+	}
+}
 ////////////
 // Step 5 //
 ////////////
