@@ -107,3 +107,21 @@
         .silex-id-1543787446480-61 {top: 20px; left: 780px; height: 80px; width: 400px;
         }
     
+
+#fractionBar1Label {
+    display: block;
+    position: absolute;
+    top: 585px;
+    left: 800px;
+    height: 80px;
+    width: 240px;
+}
+
+#fractionBar2Label {
+    display: block;
+    position: absolute;
+    top: 685px;
+    left: 800px;
+    height: 80px;
+    width: 240px;
+}

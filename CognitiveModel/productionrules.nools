@@ -55,8 +55,8 @@ function revealStepThree(problem) {
 
 	// Create answer choices and shuffle them
 	const correctOption = `Multiply the top and bottom of Fraction 1 by ${fraction1Conversion} and multiply the top and bottom of Fraction 2 by ${fraction2Conversion}`;
-	const onlyTops = `Multiply the top of Fraction 1 by ${fraction1Conversion} and the top of Fraction 2 by ${problem.den}`;
-	const onlyBottoms = `Multiply the bottom of Fraction 1 by ${fraction1Conversion} and the bottom of Fraction 2 by ${problem.den}`;
+	const onlyTops = `Multiply the top of Fraction 1 by ${fraction1Conversion} and the top of Fraction 2 by ${fraction2Conversion}`;
+	const onlyBottoms = `Multiply the bottom of Fraction 1 by ${fraction1Conversion} and the bottom of Fraction 2 by ${fraction2Conversion}`;
 	const reversedOptions = `Multiply the top and bottom of Fraction 1 by ${fraction2Conversion} and multiply the top and bottom of Fraction 2 by ${fraction1Conversion}`;
 	let options = [correctOption, onlyTops, onlyBottoms, reversedOptions];
 	shuffle(options);
@@ -431,6 +431,23 @@ rule step5Practice {
 		}
 		if (checkSAI({selection: "step_5_practice", action: "UpdateRadioButton", input: correctAnswer})) {
 			modify(p, "goal", "done");
+			assert(new TPA("fractionBar1", "SetVisible", true));
+			assert(new TPA("fractionBar1Label", "UpdateTextField", `Fraction 1: ${p.num1}/${p.den1} = ${p.num3}/${p.den3}`));
+
+			// Configure fraction bar 1
+			const bar1String = `${p.num1}/${p.den1}`;
+			assert(new TPA("fractionBar1", "SetPieces", bar1String));
+			assert(new TPA("fractionBar1", "set_denominator", p.commonDen*2));
+			assert(new TPA("fractionBar1", "set_denominator", p.commonDen));
+
+			assert(new TPA("fractionBar2", "SetVisible", true));
+			assert(new TPA("fractionBar2Label", "UpdateTextField", `Fraction 2: ${p.num2}/${p.den2} = ${p.num4}/${p.den4}`));
+			// Configure fraction bar 2
+			const bar2String = `${p.num2}/${p.den2}`;
+			// const bar2String = "9/10";
+			assert(new TPA("fractionBar2", "SetPieces", bar2String));
+			assert(new TPA("fractionBar2", "set_denominator", p.commonDen*2));
+			assert(new TPA("fractionBar2", "set_denominator", p.commonDen));
 			halt();
 		} else {
 			backtrack();
