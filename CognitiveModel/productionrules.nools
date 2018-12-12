@@ -454,3 +454,19 @@ rule step5Practice {
 		}
 	}
 }
+
+//////////
+// Done //
+//////////
+rule done {
+	when {
+		p: Problem p.goal == "done";
+	} then {
+		if (checkSAI({selection: "done", action: "ButtonPressed", input: "don't_care"})) {
+			halt();
+		}
+		else {
+			backtrack();
+		}
+	}
+}
